@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controllers.ClientViewController"
+      stylesheets="@../styles/dashboard.css" spacing="20" styleClass="fade-in">
+
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
+
+    <!-- En-tête -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="5">
+            <Label text="Greenly" styleClass="section-title"/>
+            <Label text="Votre marketplace éco-responsable" style="-fx-text-fill: #27ae60; -fx-font-size: 14px;"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <TextField fx:id="searchField" promptText="Rechercher un produit..." prefWidth="300" styleClass="search-field"/>
+            <Button fx:id="mesCommandesBtn" styleClass="button-primary" onAction="#showMesCommandes">
+                <graphic>
+                    <FontAwesomeIconView glyphName="SHOPPING_CART" size="16"/>
+                </graphic>
+                <text>Mes Commandes</text>
+            </Button>
+        </HBox>
+    </HBox>
+
+    <!-- Contenu Principal -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <!-- Vue Catalogue -->
+        <VBox fx:id="catalogueView" spacing="25">
+            <!-- Filtres -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="filter-container">
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <VBox spacing="5">
+                        <Label text="Filtrer par catégorie" styleClass="subtitle"/>
+                        <ComboBox fx:id="categorieFilter" prefWidth="250"/>
+                    </VBox>
+                </HBox>
+                <Separator orientation="VERTICAL"/>
+                <VBox spacing="5">
+                    <Label text="Prix maximum" styleClass="subtitle"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Slider fx:id="prixSlider" prefWidth="250" showTickLabels="true"/>
+                        <Label fx:id="prixLabel" text="1000 DT" style="-fx-font-weight: bold;"/>
+                    </HBox>
+                </VBox>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Réinitialiser" onAction="#resetFilters" styleClass="button-default">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="REFRESH" size="14"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <!-- Grille de Produits -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background: transparent; -fx-background-color: transparent;">
+                <GridPane fx:id="produitsGrid" hgap="25" vgap="25" alignment="CENTER">
+                    <!-- Les cartes de produits seront ajoutées dynamiquement ici -->
+                </GridPane>
+            </ScrollPane>
+        </VBox>
+
+        <!-- Vue Mes Commandes -->
+        <VBox fx:id="commandesView" spacing="25" visible="false">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button onAction="#retourCatalogue" styleClass="button-default">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="ARROW_LEFT" size="14"/>
+                    </graphic>
+                    <text>Retour au catalogue</text>
+                </Button>
+                <VBox spacing="5">
+                    <Label text="Mes Commandes" styleClass="section-title"/>
+                    <Label text="Gérez vos commandes en cours" style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;"/>
+                </VBox>
+            </HBox>
+
+            <TableView fx:id="commandesTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="numeroCommandeCol" text="N° Commande" prefWidth="120"/>
+                    <TableColumn fx:id="produitCol" text="Produit" prefWidth="200"/>
+                    <TableColumn fx:id="montantCol" text="Montant" prefWidth="100"/>
+                    <TableColumn fx:id="dateCol" text="Date" prefWidth="120"/>
+                    <TableColumn fx:id="statutCol" text="Statut" prefWidth="120"/>
+                    <TableColumn fx:id="actionsCol" text="Actions" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </StackPane>
+
+    <!-- Pied de page -->
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="© 2023 Agriwise - Tous droits réservés" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+    </HBox>
+
+</VBox> 

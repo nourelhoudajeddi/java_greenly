@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controllers.AdminDashboardController"
+      stylesheets="@../styles/dashboard.css">
+
+    <!-- Menu latéral -->
+    <VBox styleClass="sidebar">
+        <padding>
+            <Insets top="20" right="10" bottom="20" left="10"/>
+        </padding>
+        
+        <Text text="Admin Dashboard" styleClass="sidebar-title"/>
+        
+        <Button styleClass="nav-button" onAction="#showProduits">
+            <graphic>
+                <FontAwesomeIconView glyphName="SHOPPING_CART" size="20"/>
+            </graphic>
+            <text>Produits</text>
+        </Button>
+        
+        <Button styleClass="nav-button" onAction="#showCommandes">
+            <graphic>
+                <FontAwesomeIconView glyphName="LIST" size="20"/>
+            </graphic>
+            <text>Commandes</text>
+        </Button>
+        
+        <Region VBox.vgrow="ALWAYS"/>
+        
+        <Button styleClass="nav-button, logout-button" onAction="#handleLogout">
+            <graphic>
+                <FontAwesomeIconView glyphName="SIGN_OUT" size="20"/>
+            </graphic>
+            <text>Déconnexion</text>
+        </Button>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <StackPane HBox.hgrow="ALWAYS" styleClass="main-content">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+        
+        <VBox fx:id="produitsView">
+            <fx:include source="ProduitView.fxml"/>
+        </VBox>
+        
+        <VBox fx:id="commandesView" visible="false">
+            <fx:include source="CommandeView.fxml"/>
+        </VBox>
+    </StackPane>
+
+</HBox> 

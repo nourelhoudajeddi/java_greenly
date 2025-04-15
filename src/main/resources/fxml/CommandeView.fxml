@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+
+<ScrollPane fitToWidth="true" styleClass="main-scroll-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.CommandeController">
+    <VBox spacing="20" styleClass="glass-pane">
+        <padding>
+            <Insets top="25" right="25" bottom="25" left="25"/>
+        </padding>
+
+        <!-- En-tête avec titre et statistiques -->
+        <VBox spacing="20">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Gestion des Commandes" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button onAction="#retourCatalogue" styleClass="button">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="ARROW_LEFT" size="16"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <!-- Cartes de statistiques -->
+            <HBox spacing="20">
+                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <Label fx:id="enAttenteLbl" styleClass="stat-value"/>
+                    <Label text="En attente" styleClass="stat-label"/>
+                </VBox>
+                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <Label fx:id="enCoursLbl" styleClass="stat-value"/>
+                    <Label text="En cours" styleClass="stat-label"/>
+                </VBox>
+                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <Label fx:id="livreesLbl" styleClass="stat-value"/>
+                    <Label text="Livrées" styleClass="stat-label"/>
+                </VBox>
+                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalLbl" styleClass="stat-value"/>
+                    <Label text="Total" styleClass="stat-label"/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- Filtres -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <TextField fx:id="searchField" promptText="Rechercher une commande..." prefWidth="300"/>
+            <ComboBox fx:id="statutFilter" prefWidth="200"/>
+            <DatePicker fx:id="dateFilter" prefWidth="200"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button onAction="#resetFilters" styleClass="button">
+                <graphic>
+                    <FontAwesomeIconView glyphName="REFRESH" size="16"/>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Tableau des commandes -->
+        <TableView fx:id="commandesTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="numeroCommandeCol" text="N° Commande" prefWidth="150"/>
+                <TableColumn fx:id="produitCol" text="Produit" prefWidth="200"/>
+                <TableColumn fx:id="montantCol" text="Montant" prefWidth="120"/>
+                <TableColumn fx:id="dateCol" text="Date" prefWidth="120"/>
+                <TableColumn fx:id="statutCol" text="Statut" prefWidth="120"/>
+                <TableColumn fx:id="actionsCol" text="Actions" prefWidth="100"/>
+            </columns>
+        </TableView>
+
+        <!-- Résumé -->
+        <HBox spacing="20" alignment="CENTER_RIGHT">
+            <Label fx:id="totalCommandesLbl" styleClass="summary-text"/>
+            <Label fx:id="montantTotalLbl" styleClass="summary-text"/>
+        </HBox>
+
+        <!-- Formulaire de modification -->
+        <VBox fx:id="modificationForm" styleClass="modification-form" visible="false">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Détails de la commande" styleClass="detail-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button onAction="#closeModificationForm" styleClass="button-delete">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="TIMES" size="16"/>
+                    </graphic>
+                </Button>
+            </HBox>
+            
+            <GridPane hgap="15" vgap="15" styleClass="detail-grid">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="N° Commande" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="detail-label"/>
+                <TextField fx:id="modifNumeroCommande" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="false"/>
+
+                <Label text="Produit" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="detail-label"/>
+                <ComboBox fx:id="modifProduit" GridPane.rowIndex="1" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+                <Label text="Montant" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="detail-label"/>
+                <TextField fx:id="modifMontant" GridPane.rowIndex="2" GridPane.columnIndex="1" editable="false"/>
+
+                <Label text="Statut" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="detail-label"/>
+                <ComboBox fx:id="modifStatut" GridPane.rowIndex="3" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+                <Label text="Date" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="detail-label"/>
+                <DatePicker fx:id="modifDate" GridPane.rowIndex="4" GridPane.columnIndex="1" maxWidth="Infinity"/>
+            </GridPane>
+
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button onAction="#handleSaveModification" styleClass="button-edit">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="SAVE" size="16"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Enregistrer les modifications"/>
+                    </tooltip>
+                </Button>
+            </HBox>
+        </VBox>
+    </VBox>
+</ScrollPane> 
