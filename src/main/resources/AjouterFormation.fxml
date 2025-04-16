@@ -91,6 +91,7 @@
 
             <ChoiceBox fx:id="nommoduleChoiceBox1" layoutX="450.0" layoutY="447.0" prefWidth="150.0" />
             <Label fx:id="moduleError" layoutX="450.0" layoutY="471.0" text="Ce champ est requis" textFill="red" visible="false" />
+            <Button fx:id="ajouterFormationButton1" layoutX="599.0" layoutY="521.0" mnemonicParsing="false" onAction="#afficherformationsfront" style="-fx-background-color: #4CAF50;" text="Voir les formations dans l'accueil" />
 
          </children>
       </AnchorPane>

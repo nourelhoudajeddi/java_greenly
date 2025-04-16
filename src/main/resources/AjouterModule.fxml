@@ -22,28 +22,28 @@
       <Label layoutX="327.0" layoutY="442.0" text="Date creation module" />
       
       <TextField fx:id="nomModuleField" layoutX="450.0" layoutY="184.0" />
-      <Label fx:id="nomModuleError" layoutX="450.0" layoutY="208.0" text="Ce champ est requis" visible="false" textFill="red" />
+      <Label fx:id="nomModuleError" layoutX="450.0" layoutY="208.0" text="Ce champ est requis" textFill="red" visible="false" />
 
       <TextField fx:id="descriptionModuleField" layoutX="450.0" layoutY="227.0" />
-      <Label fx:id="descriptionModuleError" layoutX="450.0" layoutY="252.0" text="Ce champ est requis" visible="false" textFill="red" />
+      <Label fx:id="descriptionModuleError" layoutX="450.0" layoutY="252.0" text="Ce champ est requis" textFill="red" visible="false" />
 
       <TextField fx:id="nbHeuresField" layoutX="450.0" layoutY="270.0" />
-      <Label fx:id="nbHeuresError" layoutX="450.0" layoutY="293.0" text="Ce champ est requis" visible="false" textFill="red" />
+      <Label fx:id="nbHeuresError" layoutX="450.0" layoutY="293.0" text="Ce champ est requis" textFill="red" visible="false" />
 
 
       <ChoiceBox fx:id="niveauChoiceBox" layoutX="450.0" layoutY="313.0" prefWidth="150.0" />
-      <Label fx:id="niveauError" layoutX="450.0" layoutY="340.0" text="Ce champ est requis" visible="false" textFill="red" />
+      <Label fx:id="niveauError" layoutX="450.0" layoutY="340.0" text="Ce champ est requis" textFill="red" visible="false" />
 
 
 
       <ComboBox fx:id="categorieComboBox" layoutX="450.0" layoutY="362.0" prefWidth="150.0" />
-      <Label fx:id="categorieError" layoutX="450.0" layoutY="389.0" text="Ce champ est requis" visible="false" textFill="red" />
+      <Label fx:id="categorieError" layoutX="450.0" layoutY="389.0" text="Ce champ est requis" textFill="red" visible="false" />
 
 
       <CheckBox fx:id="statutCheckBox" layoutX="450.0" layoutY="402.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="84.0" text="Actif" />
 
       <DatePicker fx:id="dateCreationPicker" layoutX="450.0" layoutY="438.0" />
-      <Label fx:id="dateCreationError" layoutX="450.0" layoutY="463.0" text="La date de création est incorrecte" visible="false" textFill="red" />
+      <Label fx:id="dateCreationError" layoutX="450.0" layoutY="463.0" text="La date de création est incorrecte" textFill="red" visible="false" />
 
       <Button fx:id="ajouterModuleButton" layoutX="434.0" layoutY="521.0" mnemonicParsing="false" onAction="#ajouterModule" style="-fx-background-color: #4CAF50;" text="Ajouter un module" />
       <TextField alignment="CENTER" layoutX="365.0" layoutY="59.0" prefHeight="44.0" prefWidth="213.0" styleClass="button4" stylesheets="@css/fullpackstyling.css" text="Ajouter un module" />
@@ -96,5 +96,6 @@
             </Button>
          </children>
       </VBox>
+      <Button fx:id="ajouterModuleButton1" layoutX="567.0" layoutY="521.0" mnemonicParsing="false" onAction="#affichermodulesfront" style="-fx-background-color: #4CAF50;" text="Voir les modules dans l'accueil" />
    </children>
 </AnchorPane>
