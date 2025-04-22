@@ -1,0 +1,40 @@
+.event-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);
+    -fx-border-radius: 10;
+    -fx-border-color: #81C784;
+    -fx-border-width: 1;
+}
+
+.event-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.event-card Label {
+    -fx-text-fill: #2E7D32;
+}
+
+.status-label {
+    -fx-background-color: #E8F5E9;
+    -fx-background-radius: 15;
+    -fx-padding: 5 10 5 10;
+    -fx-text-fill: #2E7D32;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
