@@ -45,6 +45,9 @@ public class AjouterModuleController {
     @FXML
     private Button btnformation;
 
+    @FXML
+    private Button ajouterModuleButton1;
+
 
     // Labels d'erreur
     @FXML private Label nomModuleError;
@@ -218,6 +221,19 @@ public class AjouterModuleController {
             Parent root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) btnformation.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void affichermodulesfront() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherFormationsFront.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ajouterModuleButton1.getScene().getWindow();
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {

@@ -24,7 +24,7 @@ public class Main {
 
         Formation formation = new Formation();
        formation.setNomFormation("akll");
-        formation.setDescriptionFormation("piedev");
+        formation.setDescriptionFormation("pieda");
         formation.setModeFormation("Distanciel");
         formation.setDureeFormation(4);
         formation.setDateDebutFormation(new java.util.Date());

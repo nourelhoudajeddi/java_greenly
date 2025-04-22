@@ -48,6 +48,9 @@ public class AjouterFormationController {
     private Button btnmodule;
 
     @FXML
+    private Button ajouterFormationButton1;
+
+    @FXML
     private Button btnformation;
     @FXML private Label nomFormationError;
     @FXML private Label descriptionFormationError;
@@ -276,4 +279,18 @@ public class AjouterFormationController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void afficherformationsfront() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherFormationsFront.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ajouterFormationButton1.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
