@@ -26,6 +26,7 @@ public class AjouterFormationController {
     @FXML
     private TextField descriptionFormationField;
 
+
     @FXML
     private TextField dureeField;
 
