@@ -99,8 +99,9 @@
             <HBox prefHeight="45.0" prefWidth="912.0" GridPane.rowIndex="1">
                <children>
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="🔍" />
-                  <TextField prefHeight="31.0" prefWidth="311.0" />
-                  <ComboBox prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
+                  <TextField fx:id="recherche" onAction="#rechercher" prefHeight="31.0" prefWidth="311.0" />
+                  <ComboBox fx:id="trie" onAction="#trierm" prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
+                  <ComboBox fx:id="triem" onAction="#trierm" prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
                   <Button fx:id="btnaj" mnemonicParsing="false" onAction="#handleAjouterModule" prefHeight="25.0" prefWidth="189.0" styleClass="button3" stylesheets="@css/fullpackstyling.css" text="➕  Ajouter un module" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />

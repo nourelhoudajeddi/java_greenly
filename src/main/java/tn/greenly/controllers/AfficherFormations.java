@@ -3,6 +3,7 @@ package tn.greenly.controllers;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,6 +16,8 @@ import tn.greenly.services.FormationService;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AfficherFormations {
@@ -50,6 +53,18 @@ public class AfficherFormations {
     @FXML
     private Button btnformation;
 
+    @FXML
+    private TextField recherchef;
+
+    @FXML
+    private ComboBox<String> trifrorm; // attributs
+    @FXML
+    private ComboBox<String> trifor;
+
+    @FXML
+    private TableView<Formation> formationTable; // Déclare la TableView pour afficher les formations
+
+
     private final FormationService formationService = new FormationService();
 
     @FXML
@@ -67,13 +82,20 @@ public class AfficherFormations {
         addSupprimerButtonToTable();
 
         loadFormations();
+        trifrorm.getItems().addAll("Nom", "Durée", "Date début", "Date fin", "Mode");
+        trifor.getItems().addAll("Ascendant", "Descendant");
+
+        trifrorm.setValue("Nom");
+        trifor.setValue("Ascendant");
+
+
     }
 
     private void loadFormations() {
         try {
             List<Formation> formations = formationService.recuperer();
             ObservableList<Formation> observableFormations = FXCollections.observableArrayList(formations);
-            moduleTable.setItems(observableFormations);
+            formationTable.setItems(observableFormations);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -183,4 +205,76 @@ public class AfficherFormations {
             e.printStackTrace();
         }
     }
-}
+
+
+
+
+        @FXML
+        private void rechercherf() {
+            String keyword = recherchef.getText().toLowerCase();
+
+            try {
+                // Récupère toutes les formations
+                List<Formation> formations = formationService.recuperer(); // Assurez-vous d'avoir une méthode pour récupérer les formations
+                List<Formation> filteredFormations = formations.stream()
+                        .filter(formation ->
+                                formation.getNomFormation().toLowerCase().contains(keyword) ||  // Recherche dans le nom de la formation
+                                        formation.getDescriptionFormation().toLowerCase().contains(keyword) ||  // Recherche dans la description
+                                        String.valueOf(formation.getDureeFormation()).contains(keyword) ||  // Recherche dans la durée de formation
+                                        formation.getModeFormation().toLowerCase().contains(keyword) ||  // Recherche dans le mode de formation
+                                        (formation.getDateDebutFormation() != null && formation.getDateDebutFormation().toString().contains(keyword)) ||  // Recherche dans la date de début
+                                        (formation.getDateFinFormation() != null && formation.getDateFinFormation().toString().contains(keyword)) ||  // Recherche dans la date de fin
+                                        (formation.getModule() != null && formation.getModule().getNomModule().toLowerCase().contains(keyword))  // Recherche dans le nom du module
+                        )
+                        .toList();
+
+                // Met à jour la table avec les formations filtrées
+                formationTable.setItems(FXCollections.observableArrayList(filteredFormations)); // Remplir la TableView avec les données filtrées
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    @FXML
+    private void trier(ActionEvent event) {
+        String attribut = trifrorm.getValue();
+        String ordre = trifor.getValue();
+
+        if (attribut == null || ordre == null) return;
+
+        Comparator<Formation> comparator = null;
+
+        switch (attribut) {
+            case "Nom":
+                comparator = Comparator.comparing(Formation::getNomFormation, String.CASE_INSENSITIVE_ORDER);
+                break;
+            case "Durée":
+                comparator = Comparator.comparingInt(Formation::getDureeFormation);
+                break;
+            case "Date début":
+                comparator = Comparator.comparing(Formation::getDateDebutFormation);
+                break;
+            case "Date fin":
+                comparator = Comparator.comparing(Formation::getDateFinFormation);
+                break;
+            case "Mode":
+                comparator = Comparator.comparing(Formation::getModeFormation, String.CASE_INSENSITIVE_ORDER);
+                break;
+        }
+
+
+            if (comparator != null) {
+                if ("Descendant".equalsIgnoreCase(ordre)) { // ignore case
+                    comparator = comparator.reversed();
+                }
+            }
+            List<Formation> sortedList = new ArrayList<>(formationTable.getItems());
+            sortedList.sort(comparator);
+            formationTable.getItems().setAll(sortedList);
+        }
+    }
+
+
+
+
+
+

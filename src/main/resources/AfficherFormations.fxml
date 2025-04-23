@@ -80,7 +80,7 @@
                   <RowConstraints maxHeight="423.0" minHeight="10.0" prefHeight="362.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <TableView fx:id="moduleTable" prefHeight="338.0" prefWidth="911.0" stylesheets="@css/fullpackstyling.css" GridPane.rowIndex="2">
+                  <TableView fx:id="formationTable" prefHeight="338.0" prefWidth="911.0" stylesheets="@css/fullpackstyling.css" GridPane.rowIndex="2">
                      <columns>
                         <TableColumn fx:id="colID" prefWidth="47.0" text="ID" />
                         <TableColumn fx:id="colNomFormation" prefWidth="105.0" text="NomFormation" />
@@ -100,8 +100,9 @@
                   <HBox prefHeight="45.0" prefWidth="912.0" GridPane.rowIndex="1">
                      <children>
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="🔍" />
-                        <TextField prefHeight="31.0" prefWidth="311.0" />
-                        <ComboBox prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
+                        <TextField fx:id="recherchef" onAction="#rechercherf" prefHeight="31.0" prefWidth="311.0" />
+                        <ComboBox fx:id="trifrorm" onAction="#trier" prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
+                        <ComboBox fx:id="trifor" onAction="#trier" prefHeight="25.0" prefWidth="184.0" style="-fx-border-color: #FFFFFF; -fx-background-color: #FFFFFF;" />
                         <Button fx:id="btnajf" mnemonicParsing="false" onAction="#handleAjouterFormation" prefHeight="25.0" prefWidth="189.0" styleClass="button3" stylesheets="@css/fullpackstyling.css" text="➕  Ajouter une formation" textFill="WHITE">
                            <opaqueInsets>
                               <Insets />

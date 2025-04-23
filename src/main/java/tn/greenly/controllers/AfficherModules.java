@@ -1,6 +1,7 @@
 package tn.greenly.controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,6 +14,7 @@ import tn.greenly.entites.Module;
 import tn.greenly.services.ModuleService;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.io.IOException;
 
@@ -50,6 +52,14 @@ public class AfficherModules {
     @FXML
     private Button btnformation;
 
+    @FXML
+    private TextField recherche;
+
+    @FXML
+    private ComboBox<String> trie;
+    @FXML
+    private ComboBox<String> triem;
+
 
     private final ModuleService moduleService = new ModuleService();
 
@@ -71,6 +81,12 @@ public class AfficherModules {
 
         colBtnSupprimer.setCellFactory(cellFactory);
 
+        trie.getItems().addAll( "Nom" , "NbHeures", "Niveau", "Categorie", "Statut", "DateCreation");
+        triem.getItems().addAll("Ascendant", "Descendant");
+
+        // Optionnel : valeurs par défaut
+        trie.setValue("Nom");
+        triem.setValue("Ascendant");
 
 
         // Remplir la table
@@ -192,6 +208,53 @@ public class AfficherModules {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void rechercher() {
+        String keyword = recherche.getText().toLowerCase();
+
+        try {
+            List<Module> modules = moduleService.recuperer(); // récupère tous les modules
+            List<Module> filteredModules = modules.stream()
+                    .filter(module ->
+                            module.getNomModule().toLowerCase().contains(keyword) ||
+                                    module.getDescriptionModule().toLowerCase().contains(keyword) ||
+                                    module.getCategorie().toLowerCase().contains(keyword) ||
+                                    module.getNiveau().toLowerCase().contains(keyword) ||
+                                    String.valueOf(module.getNbHeures()).contains(keyword) ||
+                                    String.valueOf(module.getId()).contains(keyword) ||
+                                    (module.getDatecreationModule() != null && module.getDatecreationModule().toString().contains(keyword))
+                    )
+                    .toList();
+
+            moduleTable.setItems(FXCollections.observableArrayList(filteredModules));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void trierm(ActionEvent event) {
+        String critere = trie.getValue();
+        String ordre = triem.getValue();
+
+        Comparator<Module> comparator = switch (critere) {
+            case "Nom" -> Comparator.comparing(Module::getNomModule, String.CASE_INSENSITIVE_ORDER);
+            case "NbHeures" -> Comparator.comparing(Module::getNbHeures);
+            case "Niveau" -> Comparator.comparing(Module::getNiveau, String.CASE_INSENSITIVE_ORDER);
+            case "Categorie" -> Comparator.comparing(Module::getCategorie, String.CASE_INSENSITIVE_ORDER);
+            case "DateCreation" -> Comparator.comparing(Module::getDatecreationModule);
+            default -> null;
+        };
+
+        if (comparator != null) {
+            if ("Descendant".equals(ordre)) {
+                comparator = comparator.reversed();
+            }
+
+            FXCollections.sort(moduleTable.getItems(), comparator);
+        }
+    }
+
+
 
 
 
