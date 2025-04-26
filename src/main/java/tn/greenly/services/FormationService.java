@@ -173,8 +173,8 @@ public  class FormationService implements IServicesformation<Formation> {
                         rs.getString("description_formation"),
                         rs.getInt("duree_formation"),
                         rs.getString("mode_formation"),
-                        rs.getDate("datedebut_formation"),
-                        rs.getDate("datefin_formation"),
+                        new java.util.Date(rs.getDate("datedebut_formation").getTime()),
+                        new java.util.Date(rs.getDate("datefin_formation").getTime()),
                         module // Associer le module à la formation
                 );
                 formations.add(formation);
@@ -182,5 +182,6 @@ public  class FormationService implements IServicesformation<Formation> {
         }
         return formations;
     }
+
 
 }

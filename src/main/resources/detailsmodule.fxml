@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.chart.PieChart?>
+
+<AnchorPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.greenly.controllers.DetailsModuleController">
+
+    <children>
+        <!-- Sidebar -->
+        <VBox layoutX="8.0" layoutY="10.0" prefHeight="613.0" prefWidth="213.0"
+              spacing="8.0" style="-fx-background-color: #2E7D32; -fx-padding: 10;">
+            <children>
+                <Button fx:id="btnuser" text="👥  Utilisateurs" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnmodule" text="📙  Modules" onAction="#gotomodules" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: #388E3C; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnformation" text="📖  Formations" onAction="#gotoformations" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnproduit" text="📦  Produits" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btncommande" text="🛒  Commandes" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnsponsors" text="🤝  Sponsors" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnevent" text="📅  Evenements" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btndon" text="💸  Dons" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="btnassoc" text="🏢  Associations" prefHeight="42.0" prefWidth="202.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;" />
+            </children>
+        </VBox>
+
+        <!-- Détails Module -->
+        <VBox layoutX="240.0" layoutY="40.0" spacing="15.0"
+              style="-fx-padding: 20; -fx-background-color: #f4fdf6; -fx-background-radius: 10;">
+            <children>
+                <Label text="📘 Détails du Module" style="-fx-font-size: 22px; -fx-text-fill: #2E7D32; -fx-font-weight: bold;" />
+                <Label fx:id="nomModuleLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 14px;" />
+                <Label fx:id="nbHeuresLabel" style="-fx-font-size: 14px;" />
+                <Label fx:id="niveauLabel" style="-fx-font-size: 14px;" />
+                <Label fx:id="categorieLabel" style="-fx-font-size: 14px;" />
+                <Label fx:id="statutLabel" style="-fx-font-size: 14px;" />
+                <Label fx:id="dateCreationLabel" style="-fx-font-size: 14px;" />
+
+
+                <PieChart fx:id="pieChart" prefWidth="300.0" prefHeight="250.0" style="-fx-background-color: transparent;" />
+                <Label fx:id="statistiquesLabel" wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #555555;" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

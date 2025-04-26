@@ -63,9 +63,31 @@ public class AfficherModulesFront implements Initializable {
         Label statutLabel = new Label("📅 Statut : " + module.isStatut());
         Label dateCreationLabel = new Label("🗓️ Création : " + module.getDatecreationModule());
 
-        card.getChildren().addAll(nomLabel, descriptionLabel, nbHeuresLabel, niveauLabel, categorieLabel, statutLabel, dateCreationLabel);
+        Button voirDetailsBtn = new Button("Voir détails");
+        voirDetailsBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 5;");
+        voirDetailsBtn.setOnAction(e -> openDetails(module));
+
+        card.getChildren().addAll(nomLabel, descriptionLabel, nbHeuresLabel, niveauLabel, categorieLabel, statutLabel, dateCreationLabel, voirDetailsBtn);
         return card;
     }
+    private void openDetails(Module module) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/detailsmodule.fxml"));
+            Parent root = loader.load();
+
+            // Obtenir le contrôleur et passer les données
+            DetailsModuleController controller = loader.getController();
+            controller.initData(module);
+
+            Stage stage = new Stage();
+            stage.setTitle("Détails du module");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void gotoformations() {
         try {

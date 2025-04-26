@@ -230,7 +230,7 @@ public class AjouterModuleController {
     @FXML
     private void affichermodulesfront() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherFormationsFront.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherModulesFront.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) ajouterModuleButton1.getScene().getWindow();

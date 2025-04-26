@@ -5,18 +5,26 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import tn.greenly.entites.Formation;
 import tn.greenly.entites.Module;
 import tn.greenly.services.FormationService;
 import tn.greenly.services.ModuleService;
+import netscape.javascript.JSObject;
 
+import java.awt.event.MouseEvent;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 public class AjouterFormationController {
 
@@ -25,7 +33,6 @@ public class AjouterFormationController {
 
     @FXML
     private TextField descriptionFormationField;
-
 
     @FXML
     private TextField dureeField;
@@ -53,20 +60,32 @@ public class AjouterFormationController {
 
     @FXML
     private Button btnformation;
-    @FXML private Label nomFormationError;
-    @FXML private Label descriptionFormationError;
-    @FXML private Label dureeError;
-    @FXML private Label modeError;
-    @FXML private Label dateDebutError;
-    @FXML private Label dateFinError;
-    @FXML private Label moduleError;
 
+    @FXML
+    private Label nomFormationError;
+    @FXML
+    private Label descriptionFormationError;
+    @FXML
+    private Label dureeError;
+    @FXML
+    private Label modeError;
+    @FXML
+    private Label dateDebutError;
+    @FXML
+    private Label dateFinError;
+    @FXML
+    private Label moduleError;
+    @FXML
+    private WebView mapView;
+
+    private double lat;
+    private double lon;
+    private WebEngine webEngine;
 
     private final FormationService formationService = new FormationService();
     private final ModuleService moduleService = new ModuleService();
 
     private List<Module> modulesDisponibles;
-
 
     @FXML
     public void initialize() {
@@ -80,6 +99,7 @@ public class AjouterFormationController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         nomFormationError.setVisible(false);
         descriptionFormationError.setVisible(false);
         dureeError.setVisible(false);
@@ -87,6 +107,20 @@ public class AjouterFormationController {
         dateDebutError.setVisible(false);
         dateFinError.setVisible(false);
         moduleError.setVisible(false);
+
+        webEngine = mapView.getEngine();
+        String url = getClass().getResource("/map.html").toExternalForm();
+        webEngine.load(url);
+
+        JSObject javaScriptWindow = (JSObject) webEngine.executeScript("window");
+        javaScriptWindow.setMember("javaObj", this);  // Lier votre contrôleur à JavaScript
+        setCoordinates(lat, lon);
+    }
+
+    public void setCoordinates(double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
+        System.out.println("Coordonnées sélectionnées: Lat = " + lat + ", Lon = " + lon);
     }
 
     @FXML
@@ -143,15 +177,12 @@ public class AjouterFormationController {
                 dateCreationPicker1.setStyle(""); // optionnel : reset le style
             }
 
-
             if (dateDebut != null && dateFin != null && !dateDebut.isBefore(dateFin)) {
                 dateDebutError.setText("La date de début doit être avant la date de fin.");
                 dateDebutError.setVisible(true);
                 dateCreationPicker.setStyle("-fx-border-color: red;");
                 isValid = false;
             }
-
-
 
             if (mode == null) {
                 modeError.setVisible(true);
@@ -160,7 +191,6 @@ public class AjouterFormationController {
                 modeError.setVisible(false);
             }
 
-
             String nomModuleChoisi = nommoduleChoiceBox1.getValue();
             if (nomModuleChoisi == null) {
                 moduleError.setVisible(true);
@@ -168,6 +198,7 @@ public class AjouterFormationController {
             } else {
                 moduleError.setVisible(false);
             }
+
             int duree = 0; // temporairement pour la portée
             if (dureeField.getText().isEmpty()) {
                 dureeError.setText("La durée est requise.");
@@ -193,20 +224,6 @@ public class AjouterFormationController {
                 }
             }
 
-            // Validation spécifique de la date de fin
-            if (dateDebut != null && dateFin != null && dateFin.isBefore(dateDebut)) {
-                dateFinError.setText("La date de fin doit être après la date de début.");
-                dateFinError.setVisible(true);
-                isValid = false;
-            } else {
-                dateFinError.setVisible(false);
-            }
-
-            // Si tous les champs sont valides, procéder à l'ajout
-            if (!isValid) {
-                return;  // On arrête si une erreur est présente
-            }
-
             // Trouver le module sélectionné
             Module moduleSelectionne = modulesDisponibles.stream()
                     .filter(m -> m.getNomModule().equals(nomModuleChoisi))
@@ -216,15 +233,55 @@ public class AjouterFormationController {
             if (moduleSelectionne == null) {
                 moduleError.setText("Le module sélectionné est introuvable.");
                 moduleError.setVisible(true);
-                return;
+                isValid = false;
+            }
+
+            // Vérification de la durée du module par rapport à la durée totale de la formation
+            if (moduleSelectionne != null) {
+                int dureeModule = moduleSelectionne.getNbHeures();
+                if (dureeModule > duree) {
+                    showAlert("Erreur", "La durée du module ne peut pas être supérieure à la durée de la formation.");
+                    isValid = false;
+                }
+            }
+
+            // Si tous les champs sont valides, procéder à l'ajout
+            if (!isValid) {
+                return;  // On arrête si une erreur est présente
             }
 
             Date dateDebutFormation = Date.from(dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Date dateFinFormation = Date.from(dateFin.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            Formation formation = new Formation(0, nom, description, Integer.parseInt(dureeStr), mode, dateDebutFormation, dateFinFormation, moduleSelectionne);
+            // Créer un fichier de configuration contenant les coordonnées
+            Properties config = new Properties();
+            config.setProperty("Latitude", String.valueOf(lat));
+            config.setProperty("Longitude", String.valueOf(lon));
 
-            // Appel du service pour ajouter la formation
+            String path = "config.properties";
+            try (FileOutputStream outputStream = new FileOutputStream(path)) {
+                config.store(outputStream, null);
+                System.out.println("Les coordonnées ont été sauvegardées dans config.properties.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // Lire les propriétés sauvegardées
+            Properties loadedConfig = new Properties();
+            try (InputStream input = getClass().getResourceAsStream("/config.properties")) {
+                if (input == null) {
+                    System.out.println("Le fichier config.properties n'a pas été trouvé.");
+                } else {
+                    loadedConfig.load(input);
+                    System.out.println("Latitude: " + loadedConfig.getProperty("Latitude"));
+                    System.out.println("Longitude: " + loadedConfig.getProperty("Longitude"));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // Création de l'objet Formation et appel du service pour l'ajouter
+            Formation formation = new Formation(0, nom, description, Integer.parseInt(dureeStr), mode, dateDebutFormation, dateFinFormation, moduleSelectionne);
             formationService.ajouter(formation);
             System.out.println("Formation ajoutée à la base de données avec succès.");
 
@@ -238,12 +295,11 @@ public class AjouterFormationController {
 
         } catch (SQLException e) {
             showAlert("Erreur", "Erreur lors de l'ajout de la formation.");
-            e.printStackTrace(); // Affichage des erreurs SQL pour le débogage
+            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace(); // Affichage des erreurs IO pour le débogage
+            e.printStackTrace();
         }
     }
-
 
     private void showAlert(String titre, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -252,6 +308,7 @@ public class AjouterFormationController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 
     @FXML
     private void goToAfficherModules() {
@@ -280,6 +337,7 @@ public class AjouterFormationController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void afficherformationsfront() {
         try {
@@ -293,5 +351,4 @@ public class AjouterFormationController {
             e.printStackTrace();
         }
     }
-
 }

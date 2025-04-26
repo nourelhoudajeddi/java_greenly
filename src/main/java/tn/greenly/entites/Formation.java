@@ -12,6 +12,8 @@ public class Formation {
     private Date dateFinFormation;
    // private int module_id;
    private Module module;
+    private double latitude;  // Ajout des coordonnées
+    private double longitude;
 
 
     // Constructeur sans argument
@@ -31,9 +33,26 @@ public class Formation {
         this.module = module;
 
 
+
     }
 
     // Getters et Setters
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
     public int getId() {
         return id;
     }

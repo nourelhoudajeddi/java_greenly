@@ -62,8 +62,29 @@ public class AfficherFormationsFront implements Initializable {
         Label dateDebutLabel = new Label("📅 Début : " + formation.getDateDebutFormation());
         Label dateFinLabel = new Label("📅 Fin : " + formation.getDateFinFormation());
 
-        card.getChildren().addAll(nomLabel, descriptionLabel, dureeLabel, modeLabel, dateDebutLabel, dateFinLabel);
+        Button detailsButton = new Button("Voir les détails");
+        detailsButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        detailsButton.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/detailformation.fxml"));
+                Parent root = loader.load();
+
+                DetailFormationController controller = loader.getController();
+                controller.initData(formation); // passe les infos de la formation
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Détails de la Formation");
+                stage.show();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        // Ajout à la carte
+        card.getChildren().addAll(nomLabel, descriptionLabel, dureeLabel, modeLabel, dateDebutLabel, dateFinLabel, detailsButton);
         return card;
+
     }
     @FXML
     private void gotomodules() {
@@ -77,4 +98,18 @@ public class AfficherFormationsFront implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-}}
+}
+    private void showDetailsPopup(Formation formation) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Détails de la formation");
+        alert.setHeaderText(formation.getNomFormation());
+        alert.setContentText(
+                "Description : " + formation.getDescriptionFormation() + "\n" +
+                        "Durée : " + formation.getDureeFormation() + " h\n" +
+                        "Mode : " + formation.getModeFormation() + "\n" +
+                        "Date début : " + formation.getDateDebutFormation() + "\n" +
+                        "Date fin : " + formation.getDateFinFormation()
+        );
+        alert.showAndWait();
+    }
+}
