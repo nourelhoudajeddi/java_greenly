@@ -2,7 +2,7 @@ package tn.esprit.entities;
 
 import java.time.LocalDate;
 
-public class Produit {
+public class    Produit {
     private int id;
     private String nom;
     private double prix;

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <ScrollPane fitToWidth="true" styleClass="main-scroll-pane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="tn.esprit.controllers.ProduitController" stylesheets="@../styles/dashboard.css">
+            fx:controller="tn.esprit.controllers.ProduitController" stylesheets="@../styles/dashboard.css">
     <VBox spacing="15" styleClass="glass-pane">
         <padding>
             <Insets top="20" right="20" bottom="20" left="20"/>
@@ -21,42 +21,37 @@
                 <ColumnConstraints hgrow="ALWAYS" />
             </columnConstraints>
 
+            <!-- Formulaire -->
             <Label text="Nom:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="detail-label"/>
             <TextField fx:id="nomField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label fx:id="nomError" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="error-label"/>
 
-            <Label text="Prix:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="detail-label"/>
-            <TextField fx:id="prixField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Prix:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="detail-label"/>
+            <TextField fx:id="prixField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label fx:id="prixError" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="error-label"/>
 
-            <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="detail-label"/>
-            <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefRowCount="3"/>
+            <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="detail-label"/>
+            <TextArea fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="4" prefRowCount="3"/>
+            <Label fx:id="descriptionError" GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="error-label"/>
 
-            <Label text="Catégorie:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="detail-label"/>
-            <ComboBox fx:id="categorieCombo" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="Infinity"/>
+            <Label text="Catégorie:" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="detail-label"/>
+            <ComboBox fx:id="categorieCombo" GridPane.columnIndex="1" GridPane.rowIndex="6" maxWidth="Infinity"/>
+            <Label fx:id="categorieError" GridPane.columnIndex="1" GridPane.rowIndex="7" styleClass="error-label"/>
         </GridPane>
 
         <HBox spacing="10" alignment="CENTER">
             <Button text="Ajouter" onAction="#handleAjouter" styleClass="button-success"/>
             <Button text="Modifier" onAction="#handleModifier" styleClass="button-edit"/>
-            <Button text="Supprimer" onAction="#handleSupprimer" styleClass="button-delete"/>
             <Button text="Effacer" onAction="#handleEffacer" styleClass="button"/>
         </HBox>
 
-        <TableView fx:id="produitTable" VBox.vgrow="ALWAYS" styleClass="table-view">
-            <columns>
-                <TableColumn fx:id="idColumn" text="ID" prefWidth="100"/>
-                <TableColumn fx:id="nomColumn" text="Nom du Produit" prefWidth="200"/>
-                <TableColumn fx:id="prixColumn" text="Prix" prefWidth="120"/>
-                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="250"/>
-                <TableColumn fx:id="categorieColumn" text="Catégorie" prefWidth="150"/>
-                <TableColumn fx:id="dateColumn" text="Date" prefWidth="120"/>
-            </columns>
-            <placeholder>
-                <Label text="Aucun produit trouvé" />
-            </placeholder>
-            <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-            </columnResizePolicy>
-        </TableView>
+        <!-- NOUVEAU: Zone d'affichage des cartes produits -->
+        <FlowPane fx:id="produitContainer" hgap="20" vgap="20" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+        </FlowPane>
+
 
         <HBox spacing="10" alignment="CENTER" styleClass="filters-container">
             <Label text="Rechercher par catégorie:" styleClass="detail-label"/>
@@ -68,5 +63,6 @@
             <Button text="Rechercher" onAction="#handleRecherchePrix" styleClass="button-success"/>
             <Button text="Réinitialiser" onAction="#handleReinitialiser" styleClass="button"/>
         </HBox>
+
     </VBox>
-</ScrollPane> 
+</ScrollPane>

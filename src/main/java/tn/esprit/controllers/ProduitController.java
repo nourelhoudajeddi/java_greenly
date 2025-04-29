@@ -1,20 +1,35 @@
 package tn.esprit.controllers;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import jakarta.mail.Message;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import tn.esprit.dao.ProduitDAO;
 import tn.esprit.entities.Produit;
-import javafx.scene.control.Alert.AlertType;
 
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 import java.util.ResourceBundle;
+
+
+
+
 
 public class ProduitController implements Initializable {
 
@@ -22,18 +37,17 @@ public class ProduitController implements Initializable {
     @FXML private TextField prixField;
     @FXML private TextArea descriptionField;
     @FXML private ComboBox<String> categorieCombo;
-    @FXML private TableView<Produit> produitTable;
-    @FXML private TableColumn<Produit, Integer> idColumn;
-    @FXML private TableColumn<Produit, String> nomColumn;
-    @FXML private TableColumn<Produit, Double> prixColumn;
-    @FXML private TableColumn<Produit, String> descriptionColumn;
-    @FXML private TableColumn<Produit, LocalDate> dateColumn;
-    @FXML private TableColumn<Produit, String> categorieColumn;
     @FXML private ComboBox<String> rechercheCategorie;
     @FXML private TextField prixMinField;
     @FXML private TextField prixMaxField;
+    @FXML private Label nomError;
+    @FXML private Label prixError;
+    @FXML private Label descriptionError;
+    @FXML private Label categorieError;
+    @FXML private FlowPane produitContainer;
 
     private final ProduitDAO produitDAO = new ProduitDAO();
+    private Produit produitSelectionne;  // Variable pour stocker le produit sélectionné
     private final ObservableList<Produit> produitList = FXCollections.observableArrayList();
     private final ObservableList<String> categories = FXCollections.observableArrayList(
             "Électronique", "Vêtements", "Alimentation", "Maison", "Sport", "Autre"
@@ -41,52 +55,9 @@ public class ProduitController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Configuration des colonnes
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nomColumn.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        prixColumn.setCellValueFactory(new PropertyValueFactory<>("prix"));
-        prixColumn.setCellFactory(tc -> new TableCell<Produit, Double>() {
-            @Override
-            protected void updateItem(Double price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%.2f DT", price));
-                }
-            }
-        });
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-        categorieColumn.setCellValueFactory(new PropertyValueFactory<>("categorie"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        dateColumn.setCellFactory(tc -> new TableCell<Produit, LocalDate>() {
-            @Override
-            protected void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                if (empty || date == null) {
-                    setText(null);
-                } else {
-                    setText(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                }
-            }
-        });
-        
-        // Configuration des catégories
         categorieCombo.setItems(categories);
         rechercheCategorie.setItems(categories);
-        
-        // Chargement des produits
-        refreshTable();
-        
-        // Listener pour la sélection dans la table
-        produitTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                nomField.setText(newSelection.getNom());
-                prixField.setText(String.valueOf(newSelection.getPrix()));
-                descriptionField.setText(newSelection.getDescription());
-                categorieCombo.setValue(newSelection.getCategorie());
-            }
-        });
+        refreshProducts();
     }
 
     @FXML
@@ -101,69 +72,54 @@ public class ProduitController implements Initializable {
                 produit.setCategorie(categorieCombo.getValue());
 
                 produitDAO.insert(produit);
-                showAlert(AlertType.INFORMATION, "Succès", "Le produit a été ajouté avec succès.");
+
+                // ✉️ Ajouter l'envoi de mail juste après l'insertion
+                sendMail(produit.getNom(), produit.getCategorie());
+
+                showAlert(Alert.AlertType.INFORMATION, "Succès", "Le produit a été ajouté avec succès.");
                 clearFields();
-                refreshTable();
+                refreshProducts();
             } catch (SQLException e) {
-                showAlert(AlertType.ERROR, "Erreur", "Erreur lors de l'ajout du produit: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'ajout du produit: " + e.getMessage());
             }
         }
     }
 
+
     @FXML
     private void handleModifier() {
-        Produit selectedProduit = produitTable.getSelectionModel().getSelectedItem();
-        if (selectedProduit == null) {
-            showAlert(AlertType.WARNING, "Attention", "Veuillez sélectionner un produit à modifier.");
-            return;
-        }
+        if (produitSelectionne != null) {  // Vérifier si un produit a été sélectionné
+            if (validateInputs()) {  // Valider les champs
+                try {
+                    // Mettre à jour les informations du produit sélectionné
+                    produitSelectionne.setNom(nomField.getText());
+                    produitSelectionne.setPrix(Double.parseDouble(prixField.getText()));
+                    produitSelectionne.setDescription(descriptionField.getText());
+                    produitSelectionne.setCategorie(categorieCombo.getValue());
 
-        if (validateInputs()) {
-            try {
-                selectedProduit.setNom(nomField.getText());
-                selectedProduit.setPrix(Double.parseDouble(prixField.getText()));
-                selectedProduit.setDescription(descriptionField.getText());
-                selectedProduit.setCategorie(categorieCombo.getValue());
+                    // Appeler la méthode pour mettre à jour le produit dans la base de données
+                    produitDAO.update(produitSelectionne);
 
-                produitDAO.update(selectedProduit);
-                showAlert(AlertType.INFORMATION, "Succès", "Le produit a été modifié avec succès.");
-                clearFields();
-                refreshTable();
-            } catch (SQLException e) {
-                showAlert(AlertType.ERROR, "Erreur", "Erreur lors de la modification du produit: " + e.getMessage());
+                    showAlert(Alert.AlertType.INFORMATION, "Succès", "Le produit a été modifié avec succès.");
+                    clearFields();  // Réinitialiser les champs
+                    refreshProducts();  // Rafraîchir la liste des produits
+                } catch (SQLException e) {
+                    showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la mise à jour du produit: " + e.getMessage());
+                }
             }
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Aucun produit sélectionné", "Veuillez sélectionner un produit à modifier.");
         }
     }
 
     @FXML
     private void handleSupprimer() {
-        Produit selectedProduit = produitTable.getSelectionModel().getSelectedItem();
-        if (selectedProduit == null) {
-            showAlert(AlertType.WARNING, "Attention", "Veuillez sélectionner un produit à supprimer.");
-            return;
-        }
-
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation");
-        alert.setHeaderText("Supprimer le produit");
-        alert.setContentText("Êtes-vous sûr de vouloir supprimer ce produit ?");
-
-        if (alert.showAndWait().get() == ButtonType.OK) {
-            try {
-                produitDAO.delete(selectedProduit.getId());
-                showAlert(AlertType.INFORMATION, "Succès", "Le produit a été supprimé avec succès.");
-                clearFields();
-                refreshTable();
-            } catch (SQLException e) {
-                showAlert(AlertType.ERROR, "Erreur", "Erreur lors de la suppression du produit: " + e.getMessage());
-            }
-        }
+        showAlert(Alert.AlertType.INFORMATION, "Info", "Pour supprimer, sélectionnez directement dans la base ou améliorez le système.");
     }
 
     @FXML
     private void handleEffacer() {
         clearFields();
-        produitTable.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -172,8 +128,9 @@ public class ProduitController implements Initializable {
         if (categorie != null) {
             try {
                 produitList.setAll(produitDAO.findByCategorie(categorie));
+                displayProducts();
             } catch (SQLException e) {
-                showAlert(AlertType.ERROR, "Erreur", "Erreur lors de la recherche: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la recherche: " + e.getMessage());
             }
         }
     }
@@ -184,10 +141,11 @@ public class ProduitController implements Initializable {
             double min = Double.parseDouble(prixMinField.getText());
             double max = Double.parseDouble(prixMaxField.getText());
             produitList.setAll(produitDAO.findByPrixRange(min, max));
+            displayProducts();
         } catch (NumberFormatException e) {
-            showAlert(AlertType.WARNING, "Attention", "Veuillez entrer des prix valides.");
+            showAlert(Alert.AlertType.WARNING, "Attention", "Veuillez entrer des prix valides.");
         } catch (SQLException e) {
-            showAlert(AlertType.ERROR, "Erreur", "Erreur lors de la recherche: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la recherche: " + e.getMessage());
         }
     }
 
@@ -196,62 +154,203 @@ public class ProduitController implements Initializable {
         rechercheCategorie.setValue(null);
         prixMinField.clear();
         prixMaxField.clear();
-        refreshTable();
+        refreshProducts();
     }
 
-    private void refreshTable() {
+    private void refreshProducts() {
         try {
             produitList.setAll(produitDAO.getAll());
-            produitTable.setItems(produitList);
+            displayProducts();
         } catch (SQLException e) {
-            showAlert(AlertType.ERROR, "Erreur", "Erreur lors du chargement des produits: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du chargement des produits: " + e.getMessage());
         }
     }
+
+    private void displayProducts() {
+        produitContainer.getChildren().clear();
+
+        for (Produit produit : produitList) {
+            produitContainer.getChildren().add(createProduitCard(produit));
+        }
+    }
+
+    private VBox createProduitCard(Produit produit) {
+        // Création de la carte produit
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(10));
+        card.setPrefWidth(200);
+        card.setPrefHeight(250);
+        card.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+
+        // HBox pour placer les boutons en haut à droite
+        HBox topBar = new HBox(10);
+        topBar.setAlignment(Pos.TOP_RIGHT);
+
+        // Bouton de modification
+        FontAwesomeIconView editIcon = new FontAwesomeIconView(FontAwesomeIcon.PENCIL);
+        editIcon.setSize("20px");
+        Button editBtn = new Button("", editIcon);
+        editBtn.getStyleClass().add("button-edit"); // tu peux styliser ce bouton avec CSS si tu veux
+
+        // Bouton de suppression
+        FontAwesomeIconView deleteIcon = new FontAwesomeIconView(FontAwesomeIcon.TRASH);
+        deleteIcon.setSize("20px");
+        deleteIcon.setStyle("-fx-fill: red;");
+        Button deleteBtn = new Button("", deleteIcon);
+        deleteBtn.getStyleClass().add("button-delete");
+
+        // Ajouter les boutons à la barre du haut
+        topBar.getChildren().addAll(editBtn, deleteBtn);
+
+        // Action bouton Modifier
+        editBtn.setOnAction(event -> {
+            produitSelectionne = produit;  // Stocker le produit sélectionné
+            nomField.setText(produit.getNom());
+            prixField.setText(String.valueOf(produit.getPrix()));
+            descriptionField.setText(produit.getDescription());
+            categorieCombo.setValue(produit.getCategorie());
+        });
+
+        // Action bouton Supprimer
+        deleteBtn.setOnAction(event -> {
+            try {
+                produitDAO.delete(produit.getId());
+                produitList.remove(produit);
+                refreshProducts();  // Important de bien rafraîchir ici
+                showAlert(Alert.AlertType.INFORMATION, "Succès", "Produit supprimé avec succès.");
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la suppression du produit: " + e.getMessage());
+            }
+        });
+
+        // Les autres infos produit
+        Label nomLabel = new Label(produit.getNom());
+        Label prixLabel = new Label(String.format("%.2f DT", produit.getPrix()));
+        Label descriptionLabel = new Label(produit.getDescription());
+        Label categorieLabel = new Label("Catégorie : " + produit.getCategorie());
+
+        // Ajouter tous les composants à la carte
+        card.getChildren().addAll(topBar, nomLabel, prixLabel, descriptionLabel, categorieLabel);
+
+        return card;
+    }
+
 
     private void clearFields() {
         nomField.clear();
         prixField.clear();
         descriptionField.clear();
         categorieCombo.setValue(null);
+
+        // Effacer les erreurs
+        nomError.setText("");
+        prixError.setText("");
+        descriptionError.setText("");
+        categorieError.setText("");
     }
 
     private boolean validateInputs() {
-        StringBuilder errorMessage = new StringBuilder();
+        boolean isValid = true;
 
-        if (nomField.getText().trim().isEmpty()) {
-            errorMessage.append("Le nom est requis.\n");
+        nomError.setText("");
+        prixError.setText("");
+        descriptionError.setText("");
+        categorieError.setText("");
+
+        String nom = nomField.getText().trim();
+        String prixText = prixField.getText().trim();
+        String description = descriptionField.getText().trim();
+        String categorie = categorieCombo.getValue();
+
+        if (nom.isEmpty()) {
+            nomError.setText("Le nom est requis.");
+            isValid = false;
+        } else if (nom.length() < 3) {
+            nomError.setText("Au moins 3 caractères requis.");
+            isValid = false;
         }
 
-        try {
-            double prix = Double.parseDouble(prixField.getText());
-            if (prix < 0) {
-                errorMessage.append("Le prix doit être positif.\n");
+        if (prixText.isEmpty()) {
+            prixError.setText("Le prix est requis.");
+            isValid = false;
+        } else {
+            try {
+                double prix = Double.parseDouble(prixText);
+                if (prix < 0) {
+                    prixError.setText("Le prix doit être positif.");
+                    isValid = false;
+                }
+            } catch (NumberFormatException e) {
+                prixError.setText("Le prix doit être un nombre valide.");
+                isValid = false;
             }
-        } catch (NumberFormatException e) {
-            errorMessage.append("Le prix doit être un nombre valide.\n");
         }
 
-        if (descriptionField.getText().trim().isEmpty()) {
-            errorMessage.append("La description est requise.\n");
+        if (description.isEmpty()) {
+            descriptionError.setText("La description est requise.");
+            isValid = false;
+        } else if (description.length() < 10) {
+            descriptionError.setText("Au moins 10 caractères requis.");
+            isValid = false;
         }
 
-        if (categorieCombo.getValue() == null) {
-            errorMessage.append("La catégorie est requise.\n");
+        if (categorie == null || categorie.trim().isEmpty()) {
+            categorieError.setText("La catégorie est requise.");
+            isValid = false;
         }
 
-        if (errorMessage.length() > 0) {
-            showAlert(AlertType.WARNING, "Validation", errorMessage.toString());
-            return false;
-        }
-
-        return true;
+        return isValid;
     }
 
-    private void showAlert(AlertType type, String title, String content) {
+    private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }
-} 
+
+    private void sendMail(String nomProduit, String categorieProduit) {
+        try {
+            // Paramètres du serveur SMTP
+            String host = "smtp.gmail.com";
+            String port = "587";
+            String username = "adembenahmed51@gmail.com"; // <-- Remplacer par ton email
+            String password = "kqku ggkk povn dwkv"; // <-- Remplacer par ton mot de passe d'application Gmail (PAS ton mot de passe normal !)
+
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", host);
+            props.put("mail.smtp.port", port);
+
+            Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            // Définir l'expéditeur avec un nom personnalisé
+            message.setFrom(new InternetAddress(username, "Greenly")); // <-- Ajouter le nom "Greenly" ici
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("adembenahmed51@gmail.com")); // <-- Remplacer par l'email du destinataire
+            message.setSubject("Nouveau produit ajouté : " + nomProduit);
+
+            String content = "Bonjour,\n\n"
+                    + "Un nouveau produit a été ajouté dans la boutique.\n\n"
+                    + "Nom du produit : " + nomProduit + "\n"
+                    + "Catégorie : " + categorieProduit + "\n\n"
+                    + "Cordialement,\nVotre équipe.";
+
+            message.setText(content);
+
+            Transport.send(message);
+
+            System.out.println("Email envoyé avec succès !");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}

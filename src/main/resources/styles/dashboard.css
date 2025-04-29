@@ -13,6 +13,13 @@
     -fx-background: white;
 }
 
+.error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 11px;
+    -fx-padding: 2px 0 0 5px; /* Un petit décalage pour être bien placé */
+}
+
+
 .main-container {
     -fx-padding: 20;
     -fx-background-color: -fx-background;

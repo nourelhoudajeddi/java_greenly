@@ -1,5 +1,7 @@
 package tn.esprit.dao;
 
+import tn.esprit.entities.Produit;
+
 import java.sql.SQLException;
 import java.util.List;
 

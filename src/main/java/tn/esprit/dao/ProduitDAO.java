@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class ProduitDAO implements CrudDAO<Produit> {
     
     @Override
@@ -53,7 +54,7 @@ public class ProduitDAO implements CrudDAO<Produit> {
         String sql = "DELETE FROM produit WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         }
@@ -134,6 +135,8 @@ public class ProduitDAO implements CrudDAO<Produit> {
         }
         return produits;
     }
+
+
 
     public List<String> getAllCategories() throws SQLException {
         List<String> categories = new ArrayList<>();
