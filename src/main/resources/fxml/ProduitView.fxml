@@ -43,6 +43,7 @@
             <Button text="Ajouter" onAction="#handleAjouter" styleClass="button-success"/>
             <Button text="Modifier" onAction="#handleModifier" styleClass="button-edit"/>
             <Button text="Effacer" onAction="#handleEffacer" styleClass="button"/>
+            <Button text="Statistique" onAction="#onStatButtonClicked" styleClass="button"/>
         </HBox>
 
         <!-- NOUVEAU: Zone d'affichage des cartes produits -->

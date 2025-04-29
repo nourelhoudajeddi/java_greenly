@@ -24,8 +24,20 @@ import tn.esprit.entities.Produit;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+
+import javafx.scene.chart.PieChart;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import tn.esprit.utils.DatabaseConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
 
 
 
@@ -50,7 +62,7 @@ public class ProduitController implements Initializable {
     private Produit produitSelectionne;  // Variable pour stocker le produit sélectionné
     private final ObservableList<Produit> produitList = FXCollections.observableArrayList();
     private final ObservableList<String> categories = FXCollections.observableArrayList(
-            "Électronique", "Vêtements", "Alimentation", "Maison", "Sport", "Autre"
+            "Électronique", "Vêtements", "Maison", "Sport"
     );
 
     @Override
@@ -73,7 +85,6 @@ public class ProduitController implements Initializable {
 
                 produitDAO.insert(produit);
 
-                // ✉️ Ajouter l'envoi de mail juste après l'insertion
                 sendMail(produit.getNom(), produit.getCategorie());
 
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Le produit a été ajouté avec succès.");
@@ -281,7 +292,7 @@ public class ProduitController implements Initializable {
                     isValid = false;
                 }
             } catch (NumberFormatException e) {
-                prixError.setText("Le prix doit être un nombre valide.");
+                prixError.setText("Le prix doit être un nombre.");
                 isValid = false;
             }
         }
@@ -289,8 +300,8 @@ public class ProduitController implements Initializable {
         if (description.isEmpty()) {
             descriptionError.setText("La description est requise.");
             isValid = false;
-        } else if (description.length() < 10) {
-            descriptionError.setText("Au moins 10 caractères requis.");
+        } else if (description.length() < 5) {
+            descriptionError.setText("Au moins 5 caractères requis.");
             isValid = false;
         }
 
@@ -315,8 +326,8 @@ public class ProduitController implements Initializable {
             // Paramètres du serveur SMTP
             String host = "smtp.gmail.com";
             String port = "587";
-            String username = "adembenahmed51@gmail.com"; // <-- Remplacer par ton email
-            String password = "kqku ggkk povn dwkv"; // <-- Remplacer par ton mot de passe d'application Gmail (PAS ton mot de passe normal !)
+            String username = "adembenahmed51@gmail.com";
+            String password = "kqku ggkk povn dwkv";
 
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
@@ -332,8 +343,8 @@ public class ProduitController implements Initializable {
 
             Message message = new MimeMessage(session);
             // Définir l'expéditeur avec un nom personnalisé
-            message.setFrom(new InternetAddress(username, "Greenly")); // <-- Ajouter le nom "Greenly" ici
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("adembenahmed51@gmail.com")); // <-- Remplacer par l'email du destinataire
+            message.setFrom(new InternetAddress(username, "Greenly"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("adembenahmed51@gmail.com"));
             message.setSubject("Nouveau produit ajouté : " + nomProduit);
 
             String content = "Bonjour,\n\n"
@@ -352,5 +363,65 @@ public class ProduitController implements Initializable {
         }
     }
 
+    public Map<String, Integer> getStatsParCategorie() {
+        Map<String, Integer> stats = new HashMap<>();
+
+        String[] categories = {"Électronique", "Vêtements", "Maison", "Sport"};
+        String query = "SELECT COUNT(*) FROM produit WHERE categorie = ? AND nom NOT LIKE '%test%'";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            for (String categorie : categories) {
+                try (PreparedStatement pst = conn.prepareStatement(query)) {
+                    pst.setString(1, categorie);
+                    try (ResultSet rs = pst.executeQuery()) {
+                        if (rs.next()) {
+                            int count = rs.getInt(1);
+                            stats.put(categorie, count);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return stats;
+    }
+
+    // ✅ Méthode pour afficher le PieChart
+    public void afficherStatistiquesCategorie(Map<String, Integer> statsCategorie) {
+        int total = statsCategorie.values().stream().mapToInt(Integer::intValue).sum();
+
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+
+        for (Map.Entry<String, Integer> entry : statsCategorie.entrySet()) {
+            String categorie = entry.getKey();
+            int count = entry.getValue();
+
+            if (count > 0) {
+                double pourcentage = (double) count / total * 100;
+                pieChartData.add(new PieChart.Data(categorie + " (" + String.format("%.1f", pourcentage) + "%)", count));
+            }
+        }
+
+        PieChart pieChart = new PieChart(pieChartData);
+        pieChart.setTitle("Répartition des produits par catégorie");
+
+        VBox layout = new VBox(pieChart);
+        Scene scene = new Scene(layout, 500, 400);
+
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Statistiques par catégorie");
+        popupStage.setScene(scene);
+        popupStage.show();
+    }
+
+    // ✅ Appel depuis un bouton
+    @FXML
+    private void onStatButtonClicked() {
+        Map<String, Integer> stats = getStatsParCategorie();
+        afficherStatistiquesCategorie(stats);
+    }
 
 }
