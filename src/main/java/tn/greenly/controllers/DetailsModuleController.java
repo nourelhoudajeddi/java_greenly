@@ -48,6 +48,9 @@ public class DetailsModuleController {
     @FXML
     private Label statistiquesLabel;
 
+    @FXML
+    private Button btnPuzzle;
+
     public void initData(Module module) {
         // Vérifier si le module est valide
         if (module == null || module.getId() == 0) {
@@ -128,5 +131,27 @@ public class DetailsModuleController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void goToPuzzle() {
+        try {
+            // Charger le fichier FXML du puzzle
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/puzzle.fxml"));
+            Parent root = loader.load();
+
+            // Créer une nouvelle scène avec la vue du puzzle
+            Scene scene = new Scene(root, 800, 600);
+
+            // Obtenir la fenêtre actuelle (Stage)
+            Stage stage = (Stage) btnPuzzle.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la vue du puzzle : " + e.getMessage());
+        }
+    }
+
+
 
 }

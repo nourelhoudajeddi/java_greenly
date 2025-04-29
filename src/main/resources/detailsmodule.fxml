@@ -48,6 +48,8 @@
                 <Label fx:id="categorieLabel" style="-fx-font-size: 14px;" />
                 <Label fx:id="statutLabel" style="-fx-font-size: 14px;" />
                 <Label fx:id="dateCreationLabel" style="-fx-font-size: 14px;" />
+                <Button fx:id="btnPuzzle" text="Jouer au Puzzle" onAction="#goToPuzzle" />
+
 
 
                 <PieChart fx:id="pieChart" prefWidth="300.0" prefHeight="250.0" style="-fx-background-color: transparent;" />

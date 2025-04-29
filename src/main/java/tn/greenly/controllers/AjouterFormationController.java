@@ -112,9 +112,15 @@ public class AjouterFormationController {
         String url = getClass().getResource("/map.html").toExternalForm();
         webEngine.load(url);
 
-        JSObject javaScriptWindow = (JSObject) webEngine.executeScript("window");
-        javaScriptWindow.setMember("javaObj", this);  // Lier votre contrôleur à JavaScript
-        setCoordinates(lat, lon);
+// Attendre que la page soit complètement chargée avant d'injecter l'objet Java
+        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                JSObject window = (JSObject) webEngine.executeScript("window");
+                window.setMember("javaObj", this);
+            }
+        });
+
+
     }
 
     public void setCoordinates(double lat, double lon) {
@@ -239,7 +245,7 @@ public class AjouterFormationController {
             // Vérification de la durée du module par rapport à la durée totale de la formation
             if (moduleSelectionne != null) {
                 int dureeModule = moduleSelectionne.getNbHeures();
-                if (dureeModule > duree) {
+                if (dureeModule < duree) {
                     showAlert("Erreur", "La durée du module ne peut pas être supérieure à la durée de la formation.");
                     isValid = false;
                 }
@@ -308,6 +314,7 @@ public class AjouterFormationController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 
 
     @FXML

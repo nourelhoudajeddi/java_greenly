@@ -1,5 +1,7 @@
 package tn.greenly.controllers;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
 import javafx.beans.property.Property;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,11 +12,16 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import tn.greenly.entites.Formation;
 import tn.greenly.services.FormationService;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -68,6 +75,9 @@ public class AfficherFormations {
     private final FormationService formationService = new FormationService();
 
     @FXML
+    private Button btnExportPdf;
+
+    @FXML
     public void initialize() {
         colID.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
         colNomFormation.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("nomFormation"));
@@ -88,8 +98,119 @@ public class AfficherFormations {
         trifrorm.setValue("Nom");
         trifor.setValue("Ascendant");
 
+        btnExportPdf = new Button("Exporter en PDF");
+        btnExportPdf.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-cursor: hand;");
+        btnExportPdf.setOnAction(event -> {
+            try {
+                exporterPDF();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        HBox topContainer = (HBox) btnajf.getParent(); // important
+        topContainer.getChildren().add(btnExportPdf);
+
+
 
     }
+    private void creerPageHTMLPourFormation(Formation formation) throws IOException {
+        String fileName = "formation_" + formation.getId() + ".html";
+        String htmlContent = "<html><head><title>" + formation.getNomFormation() + "</title></head><body>" +
+                "<h1>" + formation.getNomFormation() + "</h1>" +
+                "<p><strong>Description:</strong> " + formation.getDescriptionFormation() + "</p>" +
+                "<p><strong>Durée:</strong> " + formation.getDureeFormation() + " heures</p>" +
+                "<p><strong>Mode:</strong> " + formation.getModeFormation() + "</p>" +
+                "<p><strong>Date début:</strong> " + formation.getDateDebutFormation() + "</p>" +
+                "<p><strong>Date fin:</strong> " + formation.getDateFinFormation() + "</p>" +
+                "<h2>Vidéo sur le recyclage :</h2>" +
+                "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/TON_ID_YOUTUBE\" frameborder=\"0\" allowfullscreen></iframe>" +
+                "</body></html>";
+
+        java.nio.file.Files.write(java.nio.file.Paths.get(fileName), htmlContent.getBytes());
+    }
+
+    private void exporterPDF() {
+        Document document = new Document();
+        try {
+            String outputPath = "formations_export.pdf";
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputPath));
+            document.open();
+
+            // En-tête avec logo
+            Image logo = Image.getInstance("C:/Users/Nour/Downloads/pidev3A50S/piedev-java/logo.png");
+            logo.scaleToFit(100, 100); // Ajuste la taille de l'image si nécessaire
+            logo.setAlignment(Element.ALIGN_LEFT);
+            document.add(logo);
+
+            // Titre
+            Paragraph title = new Paragraph("Historique des Formations", new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD));
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new Paragraph(" ")); // Ligne vide
+
+            // Table avec des couleurs et bordures
+            PdfPTable table = new PdfPTable(7); // 7 colonnes
+            table.setWidthPercentage(100); // Largeur du tableau
+            table.setSpacingBefore(10f); // Espacement avant le tableau
+            table.setSpacingAfter(10f); // Espacement après le tableau
+
+            // Définir les en-têtes de la table
+            table.addCell(createHeaderCell("Nom Formation"));
+            table.addCell(createHeaderCell("Description"));
+            table.addCell(createHeaderCell("Durée"));
+            table.addCell(createHeaderCell("Mode"));
+            table.addCell(createHeaderCell("Date Début"));
+            table.addCell(createHeaderCell("Date Fin"));
+            table.addCell(createHeaderCell("Nom Module"));
+
+            // Ajouter les données dans la table
+            for (Formation formation : formationTable.getItems()) {
+                table.addCell(createDataCell(formation.getNomFormation()));
+                table.addCell(createDataCell(formation.getDescriptionFormation()));
+                table.addCell(createDataCell(formation.getDureeFormation() + " heures"));
+                table.addCell(createDataCell(formation.getModeFormation()));
+                table.addCell(createDataCell(formation.getDateDebutFormation().toString()));
+                table.addCell(createDataCell(formation.getDateFinFormation().toString()));
+                table.addCell(createDataCell(formation.getNomModule()));
+            }
+
+            document.add(table);
+
+            // Pied de page
+            Paragraph footer = new Paragraph("Exporté le : " + java.time.LocalDate.now(), new Font(Font.FontFamily.HELVETICA, 10));
+            footer.setAlignment(Element.ALIGN_CENTER);
+            document.add(footer);
+
+            // Message de confirmation
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Export PDF");
+            alert.setHeaderText(null);
+            alert.setContentText("Exportation réussie : " + outputPath);
+            alert.showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            document.close();
+        }
+    }
+
+    private PdfPCell createHeaderCell(String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)));
+        cell.setBackgroundColor(BaseColor.CYAN); // Fond bleu clair
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        return cell;
+    }
+
+    private PdfPCell createDataCell(String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, new Font(Font.FontFamily.HELVETICA, 10)));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        return cell;
+    }
+
 
     private void loadFormations() {
         try {
@@ -129,7 +250,7 @@ public class AfficherFormations {
             controller.initData(formation); // envoie les données de la formation à modifier
 
             // Changer la scène
-            Stage stage = (Stage) moduleTable.getScene().getWindow();
+            Stage stage = (Stage) formationTable.getScene().getWindow(); // <-- correction ici
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -138,6 +259,7 @@ public class AfficherFormations {
             e.printStackTrace();
         }
     }
+
 
 
 
