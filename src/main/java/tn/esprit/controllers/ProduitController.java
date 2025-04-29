@@ -417,7 +417,6 @@ public class ProduitController implements Initializable {
         popupStage.show();
     }
 
-    // ✅ Appel depuis un bouton
     @FXML
     private void onStatButtonClicked() {
         Map<String, Integer> stats = getStatsParCategorie();
