@@ -26,9 +26,10 @@ public class AfficherFormationsFront implements Initializable {
     @FXML
     private FlowPane formationContainer;
 
-    private final FormationService formationService = new FormationService();
     @FXML
     private Button btnmodule;
+
+    private final FormationService formationService = new FormationService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -64,28 +65,33 @@ public class AfficherFormationsFront implements Initializable {
 
         Button detailsButton = new Button("Voir les détails");
         detailsButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-        detailsButton.setOnAction(e -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/detailformation.fxml"));
-                Parent root = loader.load();
-
-                DetailFormationController controller = loader.getController();
-                controller.initData(formation); // passe les infos de la formation
-
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
-                stage.setTitle("Détails de la Formation");
-                stage.show();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
+        detailsButton.setOnAction(e -> openDetails(formation)); // Appel à la méthode openDetails
 
         // Ajout à la carte
         card.getChildren().addAll(nomLabel, descriptionLabel, dureeLabel, modeLabel, dateDebutLabel, dateFinLabel, detailsButton);
         return card;
-
     }
+
+    private void openDetails(Formation formation) {
+        try {
+            // Charger le fichier FXML de la page de détails de la formation
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/detailformation.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer le contrôleur et initialiser les données
+            DetailFormationController controller = loader.getController();
+            controller.initData(formation); // Passer les informations de la formation
+
+            // Ouvrir la nouvelle fenêtre avec les détails de la formation
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Détails de la Formation");
+            stage.show();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     @FXML
     private void gotomodules() {
         try {
@@ -98,18 +104,5 @@ public class AfficherFormationsFront implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-}
-    private void showDetailsPopup(Formation formation) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-        alert.setTitle("Détails de la formation");
-        alert.setHeaderText(formation.getNomFormation());
-        alert.setContentText(
-                "Description : " + formation.getDescriptionFormation() + "\n" +
-                        "Durée : " + formation.getDureeFormation() + " h\n" +
-                        "Mode : " + formation.getModeFormation() + "\n" +
-                        "Date début : " + formation.getDateDebutFormation() + "\n" +
-                        "Date fin : " + formation.getDateFinFormation()
-        );
-        alert.showAndWait();
     }
 }

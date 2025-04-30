@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map 1</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+  <script type="text/javascript">
+    var map;
+    var marker;
+
+    function initMap() {
+      map = L.map('map').setView([33.8869, 9.5375], 6);  // Initialisation de la carte centrée sur la Tunisie
+
+      // Chargement des tuiles OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Charger les coordonnées depuis le fichier coordinates.txt
+      fetch('coordinates.txt')  // Charger le fichier texte
+              .then(response => response.text())  // Lire le contenu du fichier en texte
+              .then(data => {
+                var coordinates = data.split(',');  // Séparer les coordonnées par une virgule
+                var lat = parseFloat(coordinates[0].trim());  // Latitude
+                var lon = parseFloat(coordinates[1].trim());  // Longitude
+
+                // Validation des coordonnées
+                if (!isNaN(lat) && !isNaN(lon)) {
+                  console.log("Latitude: " + lat + ", Longitude: " + lon);
+
+                  // Ajouter un marqueur à l'emplacement des coordonnées
+                  marker = L.marker([lat, lon]).addTo(map);
+
+                  // Si besoin, afficher un popup au marqueur
+                  marker.bindPopup("<b>Coordonnées:</b><br/>Latitude: " + lat + "<br/>Longitude: " + lon).openPopup();
+                } else {
+                  console.error("Coordonnées invalides dans le fichier.");
+                  alert("Les coordonnées dans le fichier sont invalides.");
+                }
+              })
+              .catch(error => {
+                console.error("Erreur lors du chargement des coordonnées :", error);
+                alert("Erreur lors du chargement des coordonnées.");
+              });
+    }
+
+    // Initialisation de la carte après le chargement de la page
+    window.onload = initMap;
+  </script>
+</head>
+<body>
+<div id="map"></div>
+</body>
+</html>

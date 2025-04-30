@@ -1,5 +1,6 @@
 package tn.greenly.controllers;
 
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,23 +9,20 @@ import javafx.scene.control.*;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import netscape.javascript.JSObject;
 import tn.greenly.entites.Formation;
 import tn.greenly.entites.Module;
 import tn.greenly.services.FormationService;
 import tn.greenly.services.ModuleService;
-import netscape.javascript.JSObject;
 
-import java.awt.event.MouseEvent;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.FilterWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
+import java.io.PrintWriter;
 
 public class AjouterFormationController {
 
@@ -78,8 +76,6 @@ public class AjouterFormationController {
     @FXML
     private WebView mapView;
 
-    private double lat;
-    private double lon;
     private WebEngine webEngine;
 
     private final FormationService formationService = new FormationService();
@@ -107,27 +103,35 @@ public class AjouterFormationController {
         dateDebutError.setVisible(false);
         dateFinError.setVisible(false);
         moduleError.setVisible(false);
-
-        webEngine = mapView.getEngine();
+        WebEngine webEngine = mapView.getEngine();
         String url = getClass().getResource("/map.html").toExternalForm();
         webEngine.load(url);
 
-// Attendre que la page soit complètement chargée avant d'injecter l'objet Java
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+            if (newState == Worker.State.SUCCEEDED) {
                 JSObject window = (JSObject) webEngine.executeScript("window");
-                window.setMember("javaObj", this);
+                window.setMember("javaCallback", new JavaBridge());
+                System.out.println("Carte chargée avec succès");
             }
         });
-
-
+    }
+        public class JavaBridge {
+        public void getCoordinates(double lat, double lon) {
+            System.out.println("Coordonnées sélectionnées : " + lat + ", " + lon);
+            // Tu peux stocker ces coordonnées ou les afficher dans un champ TextField
+        }
     }
 
-    public void setCoordinates(double lat, double lon) {
-        this.lat = lat;
-        this.lon = lon;
-        System.out.println("Coordonnées sélectionnées: Lat = " + lat + ", Lon = " + lon);
+
+    // Méthode pour enregistrer les coordonnées dans un fichier
+    private void saveCoordinatesToFile(double lat, double lon) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("coordinates.txt", true))) {
+            writer.println("Latitude: " + lat + ", Longitude: " + lon);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @FXML
     private void ajouterFormation() {
@@ -256,40 +260,14 @@ public class AjouterFormationController {
                 return;  // On arrête si une erreur est présente
             }
 
-            Date dateDebutFormation = Date.from(dateDebut.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date dateFinFormation = Date.from(dateFin.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            // Création de l'objet Formation
+            Formation formation = new Formation(0, nom, description, duree, mode,
+                    new java.sql.Date(java.sql.Date.valueOf(dateDebut).getTime()),  // Convert LocalDate to Date
+                    new java.sql.Date(java.sql.Date.valueOf(dateFin).getTime()),    // Convert LocalDate to Date
+                    moduleSelectionne);
 
-            // Créer un fichier de configuration contenant les coordonnées
-            Properties config = new Properties();
-            config.setProperty("Latitude", String.valueOf(lat));
-            config.setProperty("Longitude", String.valueOf(lon));
-
-            String path = "config.properties";
-            try (FileOutputStream outputStream = new FileOutputStream(path)) {
-                config.store(outputStream, null);
-                System.out.println("Les coordonnées ont été sauvegardées dans config.properties.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Lire les propriétés sauvegardées
-            Properties loadedConfig = new Properties();
-            try (InputStream input = getClass().getResourceAsStream("/config.properties")) {
-                if (input == null) {
-                    System.out.println("Le fichier config.properties n'a pas été trouvé.");
-                } else {
-                    loadedConfig.load(input);
-                    System.out.println("Latitude: " + loadedConfig.getProperty("Latitude"));
-                    System.out.println("Longitude: " + loadedConfig.getProperty("Longitude"));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Création de l'objet Formation et appel du service pour l'ajouter
-            Formation formation = new Formation(0, nom, description, Integer.parseInt(dureeStr), mode, dateDebutFormation, dateFinFormation, moduleSelectionne);
             formationService.ajouter(formation);
-            System.out.println("Formation ajoutée à la base de données avec succès.");
+            showAlert("Succès", "Formation ajoutée avec succès.");
 
             // Redirection vers AfficherFormations.fxml
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherFormations.fxml"));
@@ -314,8 +292,6 @@ public class AjouterFormationController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
 
     @FXML
     private void goToAfficherModules() {

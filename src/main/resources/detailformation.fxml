@@ -32,6 +32,8 @@
                 <Label fx:id="modeFormationLabel" />
                 <Label fx:id="dateDebutLabel" />
                 <Label fx:id="dateFinLabel" />
+                <Button fx:id="btnSurvey" mnemonicParsing="false" onAction="#goToSurvey" prefHeight="42.0" prefWidth="202.0" style="-fx-background-color: #4CAF50;" text="📝  Quiz Recyclage" />
+
             </children>
         </VBox>
 

@@ -13,7 +13,7 @@
             <children>
 
                 <!-- MENU LATÉRAL AMÉLIORÉ -->
-                <VBox layoutX="0.0" layoutY="0.0" prefHeight="600.0" prefWidth="210.0" style="-fx-background-color: #388E3C; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0.5, 2, 2);">
+                <VBox prefHeight="600.0" prefWidth="210.0" style="-fx-background-color: #388E3C; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0.5, 2, 2);">
                     <children>
                         <Button fx:id="btnuser" mnemonicParsing="false" prefHeight="42.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px; -fx-alignment: CENTER_LEFT;" text="👥  Utilisateurs" />
                         <Button fx:id="btnmodule" mnemonicParsing="false" onAction="#gotomodules" prefHeight="42.0" prefWidth="200.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px; -fx-alignment: CENTER_LEFT;" text="📙  Modules" />
@@ -27,6 +27,7 @@
                     </children>
                     <padding><Insets bottom="10" left="10" right="10" top="20" /></padding>
                     <spacing>5</spacing>
+
                 </VBox>
 
                 <!-- ZONE DES FORMATIONS -->
@@ -35,6 +36,7 @@
                         <FlowPane fx:id="formationContainer" hgap="20.0" vgap="20.0">
                             <padding>
                                 <Insets bottom="20" left="20" right="20" top="20" />
+
                             </padding>
                         </FlowPane>
                     </content>
