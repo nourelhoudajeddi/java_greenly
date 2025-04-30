@@ -1,14 +1,18 @@
 package tn.greenly.controllers;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import netscape.javascript.JSObject;
 import tn.greenly.entites.Formation;
 import tn.greenly.entites.Module;
@@ -77,6 +81,14 @@ public class AjouterFormationController {
     private WebView mapView;
 
     private WebEngine webEngine;
+
+    @FXML
+    private AnchorPane notificationPane;
+
+    @FXML
+    private Label notificationLabel;
+
+
 
     private final FormationService formationService = new FormationService();
     private final ModuleService moduleService = new ModuleService();
@@ -250,10 +262,39 @@ public class AjouterFormationController {
             if (moduleSelectionne != null) {
                 int dureeModule = moduleSelectionne.getNbHeures();
                 if (dureeModule < duree) {
-                    showAlert("Erreur", "La durée du module ne peut pas être supérieure à la durée de la formation.");
+                    notificationLabel.setText("❌ La durée du module ne peut pas être supérieure à la durée de la formation.");
+                    notificationPane.setVisible(true);
+
+                    // Style et icône de la notification
+                    notificationPane.getStyleClass().add("notification-error");
+
+                    // Optionnel : fade-in animation
+                    FadeTransition ft = new FadeTransition(javafx.util.Duration.seconds(0.5), notificationPane);
+                    ft.setFromValue(0);
+                    ft.setToValue(1);
+                    ft.play();
+
+                    // Cacher la notification après 5 secondes
+                    PauseTransition pause = new PauseTransition(javafx.util.Duration.seconds(5));
+                    pause.setOnFinished(event -> {
+                        // Animation de disparition en fondu
+                        FadeTransition fadeOut = new FadeTransition(javafx.util.Duration.seconds(0.5), notificationPane);
+                        fadeOut.setFromValue(1);
+                        fadeOut.setToValue(0);
+                        fadeOut.setOnFinished(fadeEvent -> notificationPane.setVisible(false));
+                        fadeOut.play();
+                    });
+                    pause.play();
+
                     isValid = false;
+                } else {
+                    notificationPane.setVisible(false);
                 }
             }
+
+
+
+
 
             // Si tous les champs sont valides, procéder à l'ajout
             if (!isValid) {
@@ -334,4 +375,6 @@ public class AjouterFormationController {
             e.printStackTrace();
         }
     }
+
+
 }
