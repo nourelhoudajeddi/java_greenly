@@ -31,7 +31,7 @@ public class FrontOfficeWindow extends Application {
         titleBox.setPadding(new Insets(20));
         mainLayout.setTop(titleBox);
 
-        // Center section with event cards
+
         eventCardsContainer = new FlowPane();
         eventCardsContainer.setHgap(20);
         eventCardsContainer.setVgap(20);
@@ -43,7 +43,6 @@ public class FrontOfficeWindow extends Application {
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         mainLayout.setCenter(scrollPane);
 
-        // Bottom section with registration buttons
         HBox buttonBox = new HBox(20);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(20));        Button backBtn = new Button("Back to Dashboard");
