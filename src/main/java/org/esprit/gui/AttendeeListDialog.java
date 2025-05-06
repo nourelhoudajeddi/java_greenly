@@ -30,7 +30,6 @@ public class AttendeeListDialog extends Stage {
         root.setPadding(new Insets(10));
         root.getStyleClass().add("linear-grad");
 
-        // Create table
         attendeeTable = new TableView<>();
         
         TableColumn<Attendee, String> nameCol = new TableColumn<>("Name");
